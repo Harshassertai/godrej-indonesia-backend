@@ -1,36 +1,25 @@
-const mysql = require("mysql");
+const User = require("../models/UsersModel");
 const bcrypt = require("bcrypt");
-const { encryptRequest, decryptRequest } = require("../utils/crypt");
+const { decryptRequest, encryptRequest } = require("../utils/crypt");
 const { successResponse, errorResponse } = require("../utils/Response");
 const { HOST, USER, PASSWORD, DATABASE } = process.env;
 
-const con = mysql.createConnection({
-  host: HOST,
-  user: USER,
-  password: PASSWORD,
-  database: DATABASE,
-  multipleStatements: false,
-});
-
-module.exports.getUsersList = (req, res) => {
-  let sqlQuery = `select name,email,last_login,access from ${DATABASE}.users`;
-  con.query(sqlQuery, async (err, result) => {
-    if (result?.length > 0) {
-      let dataOfUsers = result.map((item) => {
-        return {
-          ...item,
-          name: item.name.charAt(0).toUpperCase() + item.name.slice(1),
-        };
-      });
-      //let encryptedResponse = await encryptRequest(dataOfUsers);
-      //let decryptedResponse = await decryptRequest(encryptedResponse);
-      return successResponse(res, "User List", 200, true, dataOfUsers);
-      // res.status(200).json({ data: encryptedResponse });
+module.exports.getUsersList = async (req, res) => {
+  try {
+    const skip = parseInt(req.query.skip) || 0;
+    const limit = parseInt(req.query.limit) || 10;
+    let UsersList = await User.find().skip(skip).limit(limit);
+    if (UsersList.length > 0) {
+      let encryptedResponse = await encryptRequest({ data: UsersList });
+      res.status(200).json({ data: encryptedResponse });
     } else {
-      return errorResponse(res, "Something Went Wrong", 404, false, err);
-      //res.status(400).json({ message: `${err}` });
+      res.status(200).json({ data: "List has been ended or No Users found." });
     }
-  });
+  } catch (error) {
+    res.status(500).json({
+      message: `Error Caught in Login :- ${error}`,
+    });
+  }
 };
 
 module.exports.deleteUser = (req, res) => {

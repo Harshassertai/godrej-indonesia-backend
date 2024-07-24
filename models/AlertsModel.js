@@ -7,15 +7,12 @@ const alertSchema = mongoose.Schema(
       default: "",
     },
     date: {
-      type: Date,
+      type: String,
     },
     time: {
       type: String,
     },
     alert: {
-      type: String,
-    },
-    image: {
       type: String,
     },
     comments: {
@@ -31,4 +28,5 @@ const alertSchema = mongoose.Schema(
   }
 );
 
-const User = mongoose.model("alert", alertSchema);
+const Alert = mongoose.model("alert", alertSchema);
+module.exports = Alert;

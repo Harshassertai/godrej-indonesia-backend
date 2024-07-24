@@ -9,11 +9,17 @@ module.exports.GetAlertsList = async (req, res) => {
 };
 
 module.exports.CreateAlert = async (req, res) => {
-  console.log("Get Alerts List");
+  let { date, time, alert, camera, image } = req.body;
   try {
-    let data = await AlertModel.insertOne({ image: "jhd" });
-    res.send(data);
+    let data = await AlertModel.create({
+      date,
+      time,
+      alert,
+      camera,
+      image,
+    });
+    res.status(201).send(data);
   } catch (error) {
-    res.send(error);
+    res.status(500).send({ error: `Error creating Alert :- ${error}` });
   }
 };

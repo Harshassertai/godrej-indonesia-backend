@@ -1,64 +1,59 @@
 let nodemailer = require("nodemailer");
 
-const getHtml = (to, description, ticketNumber) => {
-	return (
-		`A query has been raised by user with email ${to} ` +
-		"<br>" +
-		"<br>" +
-		"<table style='border: 1px solid white; border-collapse: collapse;'>" +
-		"<thead style='border: 1px solid white;  border-collapse: collapse;'>" +
-		"<th style='border: 1px solid white;  border-collapse: collapse; background-color: #96D4D4;'> Description </th>" +
-		"<th style='border: 1px solid white;  border-collapse: collapse; background-color: #96D4D4;'> Ticket Number </th>" +
-		"</thead>" +
-		"<tr>" +
-		"<td style='border: 1px solid white;  border-collapse: collapse; background-color: #96D4D4;'>" +
-		description +
-		"</td>" +
-		"<td style='border: 1px solid white;  border-collapse: collapse; background-color: #96D4D4;'>" +
-		ticketNumber +
-		"</td>" +
-		"</tr>" +
-		"</table>"
-	);
+const getHtml = (email, reseturl) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+    .email-container {
+        background-color: #ffffff;
+        width: 100%;
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .button {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 20px 0;
+        background-color: #007BFF;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+    .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #777;
+    }
+</style>
+</head>
+<body>
+<div class="email-container">
+    <h1>Reset Your Password</h1>
+    <p>Hi ${email.split("@")[0].split(".").join(" ")},</p>
+    <p>You recently requested to reset your password for your account. Click the button below to reset it.</p>
+    <a href="${reseturl}" class="button">Reset Password</a>
+    <p>If you did not request a password reset, please ignore this email or contact support if you have questions.</p>
+    <p>Thanks,<br>Godrej Indonesia Team (Assert SecureTech)</p>
+    <div class="footer">
+        <p>© Assert SecureTech Pvt. Ltd.</p>
+    </div>
+</div>
+</body>
+</html>`;
 };
-const getHtmlWithCamera = (to, description, ticketNumber, camera) => {
-	return (
-		`A query has been raised by user with email ${to} ` +
-		"<br>" +
-		"<br>" +
-		"<table style='border: 1px solid white; border-collapse: collapse;'>" +
-		"<thead style='border: 1px solid white;  border-collapse: collapse;'>" +
-		"<th style='border: 1px solid white;  border-collapse: collapse; background-color: #96D4D4;'> Description </th>" +
-		"<th style='border: 1px solid white;  border-collapse: collapse; background-color: #96D4D4;'> Ticket Number </th>" +
-		"<th style='border: 1px solid white;  border-collapse: collapse; background-color: #96D4D4;'> Camera </th>" +
-		"</thead>" +
-		"<tr>" +
-		"<td style='border: 1px solid white;  border-collapse: collapse; background-color: #96D4D4;'>" +
-		description +
-		"</td>" +
-		"<td style='border: 1px solid white;  border-collapse: collapse; background-color: #96D4D4;'>" +
-		ticketNumber +
-		"</td>" +
-		"<td style='border: 1px solid white;  border-collapse: collapse; background-color: #96D4D4;'>" +
-		JSON.stringify(
-			camera?.map((item) => {
-				return item.label;
-			})
-		) +
-		"</td>" +
-		"</tr>" +
-		"</table>"
-	);
-};
-
-const sendmailusingnodemailer = ({
-	from,
-	to,
-	description,
-	ticketNumber,
-	camera,
-}) => {
-	const transport = nodemailer.createTransport({
+const sendmailusingnodemailer = async ({ email, resettoken }) => {
+  const transport = nodemailer.createTransport({
     service: "gmail", // use your email provider
     auth: {
       user: "alpha@assertai.com", // your email
@@ -66,40 +61,24 @@ const sendmailusingnodemailer = ({
     },
   });
 
+  let reseturl = `http://localhost:3000/resetpassword?token=${resettoken}`;
   // Set up email data
   const mailOptions = {
     from: "alpha@assertai.com",
-    to: to,
-    cc: [
-      "support@assertai.com",
-      "bhagyashree.joshi@assertai.com",
-      "arpit.bhatiya@assertai.com",
-      "dinesh.maharana@assertai.com",
-    ],
-    subject: `Query For Alert. Ticket Number [${ticketNumber}]`,
-    html: camera
-      ? getHtmlWithCamera(to, description, ticketNumber, camera)
-      : getHtml(to, description, ticketNumber),
+    to: email,
+    subject: `Password Reset Email.`,
+    html: getHtml(email, reseturl),
   };
-	// Send the email
-	transport.sendMail(mailOptions, (error, info) => {
-		if (error) {
-			console.error(error);
-		} else {
-			console.log("Email sent: " + info.response);
-		}
-		// Close the transporter
-		transport.close();
-	});
 
-	// await transport.sendMail({
-	// 	from: from,
-	// 	to: to,
-	// 	// cc: cc,
-	// 	// bcc: "nimeshkumar.dabhi@siemens.com",
-	// 	subject: "Query For Alert",
-	// 	html: getHtml(from, description),
-	// });
+  let d = transport
+    .sendMail(mailOptions)
+    .then((info) => {
+      return info.response;
+    })
+    .catch((error) => {
+      return error;
+    });
+  return d;
 };
 
 module.exports = { sendmailusingnodemailer };

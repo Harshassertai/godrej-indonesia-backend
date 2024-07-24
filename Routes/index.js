@@ -2,20 +2,15 @@ const express = require("express");
 const Router = express.Router();
 
 const AuthRoutes = require("../Routes/Auth");
-const FiltersRoutes = require("../Routes/filters");
-const AlertsTableRoutes = require("../Routes/Alerts");
-const UsersTableRoutes = require("../Routes/Users");
-const PersonRoutes = require("../Routes/Person");
-const CountsRoutes = require("../Routes/Counts");
-const last24hrsRoutes = require("../Routes/last24Hours");
-const support = require("../Routes/Support");
+const UserRoutes = require("../Routes/Users");
+const LocationRoutes = require("../Routes/Location");
+const CameraRoutes = require("../Routes/Camera");
+const AlertsRoutes = require("../Routes/Alerts");
 
-// Router.use("/Auth", AuthRoutes);
-// Router.use("/Filters", FiltersRoutes);
-Router.use("/Table", AlertsTableRoutes);
-// Router.use("/Users", UsersTableRoutes);
-// Router.use("/Person", PersonRoutes);
-// Router.use("/counts", CountsRoutes);
-// Router.use("/last24hrs", last24hrsRoutes);
-// Router.use("/support", support);
+Router.use("/Auth", AuthRoutes);
+Router.use("/User", UserRoutes);
+Router.use("/Location", LocationRoutes);
+Router.use("/Camera", CameraRoutes);
+Router.use("/Alerts", AlertsRoutes);
+
 module.exports = Router;
